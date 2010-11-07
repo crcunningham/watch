@@ -75,7 +75,7 @@ main (int argc, char * argv[]) {
 			case 'h':
 			default:
 				fprintf(stderr,
-						"watch [-r depth] [-h] [-v] [path path2 ...]\n");
+						"watch [-h] [-r depth] [-v] [path path2 ...]\n");
 				exit(1);
 		}
 	}
