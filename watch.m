@@ -4,50 +4,7 @@
 #import <getopt.h>
 #import "XFWatchNode.h"
 
-
 extern const double watchVersionNumber;
-
-void 
-createChildNodesForNode(XFWatchNode *node, NSInteger maxDepth, NSInteger currentDepth)
-{
-	if(currentDepth >= maxDepth)
-	{
-		// Nodes for the max depth have been created, nothing left to do
-		return;
-	}
-	
-	
-	BOOL needToProcessChildDirectories = (currentDepth == (maxDepth - 1));
-	NSError *error = nil;
-	NSArray *contents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[node path] error:&error];
-	NSMutableArray *childrenToProcess = needToProcessChildDirectories ? [NSMutableArray array] : nil;
-
-	// Create watch nodes for the current depth
-	for(NSString *entry in contents)
-	{
-		NSString *path = [[node path] stringByAppendingPathComponent:entry];
-		XFWatchNode *child = [XFWatchNode nodeWithPath:path];
-		[child setDepth:currentDepth];
-		[child setMaxDepth:maxDepth];
-		[child setParent:node];
-		[node addChild:child];
-		
-		if(needToProcessChildDirectories && [child isDirectory])
-		{
-			// Add the create child to the list of childrent to process
-			[childrenToProcess addObject:child];
-		}
-	}
-	
-	if(needToProcessChildDirectories)
-	{
-		for(XFWatchNode *child in childrenToProcess)
-		{
-			// Create nodes for children
-			createChildNodesForNode(child, maxDepth, currentDepth + 1);
-		}
-	}
-}
 
 int 
 main (int argc, char * argv[]) {
@@ -150,8 +107,7 @@ main (int argc, char * argv[]) {
 		
 		[topLevelNodes addObject:node];
 		
-		createChildNodesForNode(node, maxDepth, currentDepth);
-		
+		[node createChildNodes];		
 	}
 
 	[[NSRunLoop mainRunLoop] run];

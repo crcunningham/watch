@@ -75,11 +75,17 @@
 			
 			dispatch_source_set_event_handler(_source, ^{
 
-				if(_isDirectory)
+				if(![[NSFileManager defaultManager] fileExistsAtPath:_path])
 				{
+					// Removed
+					printf("[%s] Removed: %s\n", [[[NSDate date] description] UTF8String], [_path UTF8String]);
+				}
+				else if(_isDirectory)
+				{
+					BOOL contentsChanged = NO;
 					NSError *error = nil;
 					NSArray *entries = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:_path error:&error];
-					
+									
 					if(entries)
 					{
 						// Enumerate the new entries... 
@@ -90,17 +96,22 @@
 						{
 							if(![_directoryEntries containsObject:entry])
 							{
+								contentsChanged = YES;
+								
 								// Added
 								printf("[%s] Added: %s\n", [[[NSDate date] description] UTF8String], [[_path stringByAppendingPathComponent:entry] UTF8String]);
 
 								// If the node being created is within the allowed depth create a new watch node
-								if(_depth+1 <= _maxDepth)
+								if(_depth < _maxDepth)
 								{
 									XFWatchNode *child = [XFWatchNode nodeWithPath:[_path stringByAppendingPathComponent:entry]];
 									[child setDepth:_depth+1];
 									[child setMaxDepth:_maxDepth];
 									[child setParent:self];
 									[self addChild:child];
+									
+									// Create child nodes for subdirectory entries
+									[child createChildNodes];
 								}
 							}
 						}
@@ -109,12 +120,15 @@
 						{
 							if(![entries containsObject:entry])
 							{
+								contentsChanged = YES;
+								
 								// Removed
 								printf("[%s] Removed: %s\n", [[[NSDate date] description] UTF8String], [[_path stringByAppendingPathComponent:entry] UTF8String]);
 								
-								if(_depth+1 <= _maxDepth)
+								if(_depth < _maxDepth)
 								{								
 									XFWatchNode *child = [_pathToNodeMap objectForKey:[_path stringByAppendingPathComponent:entry]];
+									
 									[self removeChild:child];
 								}
 							}
@@ -126,10 +140,14 @@
 						
 						
 					}
+					
+					printf("[%s] Changed: %s\n", [[[NSDate date] description] UTF8String], [_path UTF8String]);
 				}
-				
-				printf("[%s] Changed: %s\n", [[[NSDate date] description] UTF8String], [_path UTF8String]);
-				
+				else 
+				{
+					printf("[%s] Changed: %s\n", [[[NSDate date] description] UTF8String], [_path UTF8String]);
+				}
+
 			});
 			
 			dispatch_source_set_cancel_handler(_source, ^{ close(_descriptor); });
@@ -154,6 +172,11 @@
 	[super dealloc];
 }
 
+- (NSString *)description
+{
+	return [NSString stringWithFormat:@"<%@:%p> %@", [self class], self, _path];
+}
+
 - (void)addChild:(XFWatchNode *)child
 {
 	[child setParent:self];
@@ -168,5 +191,45 @@
 	[_childNodes removeObject:child];	
 }
 
+
+- (void)createChildNodes
+{
+	if(_depth > _maxDepth)
+	{
+		// Nodes for the max depth have been created, nothing left to do
+		return;
+	}
+	
+	BOOL needToProcessChildDirectories = ((_depth + 1) < _maxDepth);
+	NSError *error = nil;
+	NSArray *contents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[self path] error:&error];
+	NSMutableArray *childrenToProcess = needToProcessChildDirectories ? [NSMutableArray array] : nil;
+	
+	// Create watch nodes for the current depth
+	for(NSString *entry in contents)
+	{
+		NSString *path = [[self path] stringByAppendingPathComponent:entry];
+		XFWatchNode *child = [XFWatchNode nodeWithPath:path];
+		[child setDepth:_depth+1];
+		[child setMaxDepth:_maxDepth];
+		[child setParent:self];
+		[self addChild:child];
+		
+		if(needToProcessChildDirectories && [child isDirectory])
+		{
+			// Add the create child to the list of children to process
+			[childrenToProcess addObject:child];
+		}
+	}
+	
+	if(needToProcessChildDirectories)
+	{
+		for(XFWatchNode *child in childrenToProcess)
+		{
+			// Create nodes for children
+			[child createChildNodes];
+		}
+	}
+}
 
 @end

@@ -31,6 +31,7 @@
 - (id)initWithPath:(NSString *)path; 
 - (void)addChild:(XFWatchNode *)child;
 - (void)removeChild:(XFWatchNode *)child;
+- (void)createChildNodes;
 
 @property (readonly) NSString *path;
 @property (readonly) BOOL isDirectory;
