@@ -1,0 +1,31 @@
+A command line tool that uses dispatch sources to monitor file system events
+
+Example of monitoring a create and delete:
+
+% watch ~/Desktop 
+Watching: /Users/user/Desktop
+[2010-11-07 23:31:13 -0800] Added: /Users/user/Desktop/file
+[2010-11-07 23:31:13 -0800] Changed: /Users/user/Desktop
+[2010-11-07 23:31:16 -0800] Removed: /Users/user/Desktop/file
+[2010-11-07 23:31:16 -0800] Changed: /Users/user/Desktop
+[2010-11-07 23:31:16 -0800] Changed: /Users/user/Desktop/.DS_Store
+[2010-11-07 23:31:16 -0800] Changed: /Users/user/Desktop/.DS_Store
+[2010-11-07 23:31:21 -0800] Changed: /Users/user/Desktop/.DS_Store
+[2010-11-07 23:31:21 -0800] Changed: /Users/user/Desktop/.DS_Store
+                                    
+
+Example of creating a adding several directories and removing with a maximum watch depth of 10:
+
+% watch -r 10  
+Watching: /Users/user/src/a
+[2010-11-07 23:35:02 -0800] Added: /Users/user/src/a/s
+[2010-11-07 23:35:02 -0800] Changed: /Users/user/src/a
+[2010-11-07 23:35:10 -0800] Removed: /Users/user/src/a/s/d/f/g/2/r
+[2010-11-07 23:35:10 -0800] Removed: /Users/user/src/a/s/d/f/g/2
+[2010-11-07 23:35:10 -0800] Removed: /Users/user/src/a/s/d/f/g
+[2010-11-07 23:35:10 -0800] Removed: /Users/user/src/a/s/d/f
+[2010-11-07 23:35:10 -0800] Removed: /Users/user/src/a/s/d
+[2010-11-07 23:35:10 -0800] Removed: /Users/user/src/a/s
+[2010-11-07 23:35:10 -0800] Removed: /Users/user/src/a/s
+[2010-11-07 23:35:10 -0800] Changed: /Users/user/src/a
+
