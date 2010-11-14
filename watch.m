@@ -4,6 +4,8 @@
 #import <getopt.h>
 #import "XFWatchNode.h"
 
+// Update version with: agvtool new-version -all <new version number>
+
 extern const double watchVersionNumber;
 
 int 
@@ -13,10 +15,12 @@ main (int argc, char * argv[]) {
 
 	NSInteger maxDepth = 0;
 	
+	NSString *executablePath = nil;
+	
 	/* Parse options */
 	char ch, *q;
 	
-	while( ( ch = getopt_long(argc, argv, "r:vh", NULL, NULL) ) != -1 ) {
+	while( ( ch = getopt_long(argc, argv, "e:r:svh", NULL, NULL) ) != -1 ) {
 		switch(ch) {
 			case 'r':
 				maxDepth    = (NSInteger)strtol(optarg, &q, 10);
@@ -29,17 +33,24 @@ main (int argc, char * argv[]) {
 			case 'v':
 				fprintf(stdout, "Version %d\n", (int)watchVersionNumber);
 				exit(0);
+			case 'e': 
+				executablePath = [[NSString alloc] initWithUTF8String:optarg];
+				break;
 			case 'h':
 			default:
 				fprintf(stderr,
-						"watch [-h] [-r depth] [-v] [path path2 ...]\n");
+						"watch [-h] [-r depth] [-e path_to_executable] [-v] [path path2 ...]\n");
 				exit(1);
 		}
 	}
 	
+	if(executablePath)
+	{
+		executablePath = [executablePath stringByResolvingSymlinksInPath];
+	}
+	
 	NSMutableArray *directories = nil;
 	NSString *currentDirectory = [[NSFileManager defaultManager] currentDirectoryPath];
-	
 	
 	// Decrement the count for the options
 	argc -= optind;
@@ -104,6 +115,7 @@ main (int argc, char * argv[]) {
 		[node setDepth:currentDepth];
 		[node setMaxDepth:maxDepth];
 		[node setParent:nil];
+		[node setExecutablePath:executablePath];
 		
 		[topLevelNodes addObject:node];
 		
@@ -112,6 +124,7 @@ main (int argc, char * argv[]) {
 
 	[[NSRunLoop mainRunLoop] run];
 
+	[executablePath release];
 	[topLevelNodes release];
 	
     [pool drain];

@@ -1,0 +1,22 @@
+#!/usr/bin/perl
+
+# Chris R. Cunningham, 2010-11-13
+#	An example script that watch can execute
+#	watch -e /path/to/PerlTestScript
+
+if(@ARGV < 1)
+{
+	exit(0);
+}
+
+open(FILE, '>>/tmp/events.txt');
+
+for my $argument (@ARGV)
+{
+	# Write out the event to a log file
+	print(FILE $argument, " ");
+}
+
+print(FILE "\n");
+close(FILE); 
+
