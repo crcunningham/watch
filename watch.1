@@ -22,6 +22,8 @@ The following options are available:
 .Bl -tag -width -indent
 .It Fl h
 Displays the usage
+.It Fl s
+Don't log event stream
 .It Fl e Ar path_to_executable
 An executable to call when an event occurs. The executable will be passed 2 arguments with the format: "{CHANGED, ADDED, REMOVED, UNKNOWN} <path>". If the tool is working properly you won't receive "UNKNOWN" events
 .It Fl r Ar depth

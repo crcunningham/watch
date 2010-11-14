@@ -20,6 +20,18 @@ static NSString * const XFUnknownStatusString = @"UNKNOWN";
 @synthesize parent = _parent;
 @synthesize executablePath = _executablePath;
 
+static BOOL eventLoggingEnabled = YES;
+
++ (BOOL)eventLoggingEnabled
+{
+	return eventLoggingEnabled;
+}
+
++ (void)setEventLoggingEnabled:(BOOL)enabled
+{
+	eventLoggingEnabled = enabled;
+}
+
 + (dispatch_queue_t)watchQueue
 {
 	static dispatch_queue_t watchQueue = nil;
@@ -98,7 +110,11 @@ static NSString * const XFUnknownStatusString = @"UNKNOWN";
 				if(![[NSFileManager defaultManager] fileExistsAtPath:_path])
 				{
 					// Removed
-					printf("[%s] Removed: %s\n", [[[NSDate date] description] UTF8String], [_path UTF8String]);
+					if([XFWatchNode eventLoggingEnabled])
+					{
+						printf("[%s] Removed: %s\n", [[[NSDate date] description] UTF8String], [_path UTF8String]);
+					}
+					
 					[events addObject:[NSArray arrayWithObjects:XFRemovedStatusString, _path, nil]];
 				}
 				else if(_isDirectory)
@@ -120,7 +136,10 @@ static NSString * const XFUnknownStatusString = @"UNKNOWN";
 								contentsChanged = YES;
 								
 								// Added
-								printf("[%s] Added: %s\n", [[[NSDate date] description] UTF8String], [[_path stringByAppendingPathComponent:entry] UTF8String]);
+								if([XFWatchNode eventLoggingEnabled])
+								{
+									printf("[%s] Added: %s\n", [[[NSDate date] description] UTF8String], [[_path stringByAppendingPathComponent:entry] UTF8String]);
+								}
 
 								[events addObject:[NSArray arrayWithObjects:XFAddedStatusString, [_path stringByAppendingPathComponent:entry], nil]];
 								
@@ -149,8 +168,11 @@ static NSString * const XFUnknownStatusString = @"UNKNOWN";
 								// Removed
 								if(_depth >= _maxDepth)
 								{
-									// Log out the removed file since the child won't be logging itself
-									printf("[%s] Removed: %s\n", [[[NSDate date] description] UTF8String], [[_path stringByAppendingPathComponent:entry] UTF8String]);
+									if([XFWatchNode eventLoggingEnabled])
+									{
+										// Log out the removed file since the child won't be logging itself
+										printf("[%s] Removed: %s\n", [[[NSDate date] description] UTF8String], [[_path stringByAppendingPathComponent:entry] UTF8String]);
+									}
 
 									[events addObject:[NSArray arrayWithObjects:XFRemovedStatusString, [_path stringByAppendingPathComponent:entry], nil]];
 								}
@@ -176,12 +198,20 @@ static NSString * const XFUnknownStatusString = @"UNKNOWN";
 					}
 
 					// The directory itself has changed
-					printf("[%s] Changed: %s\n", [[[NSDate date] description] UTF8String], [_path UTF8String]);
+					if([XFWatchNode eventLoggingEnabled])
+					{
+						printf("[%s] Changed: %s\n", [[[NSDate date] description] UTF8String], [_path UTF8String]);
+					}
+					
 					[events addObject:[NSArray arrayWithObjects:XFChangedStatusString, _path, nil]];
 				}
 				else 
 				{
-					printf("[%s] Changed: %s\n", [[[NSDate date] description] UTF8String], [_path UTF8String]);
+					if([XFWatchNode eventLoggingEnabled])
+					{
+						printf("[%s] Changed: %s\n", [[[NSDate date] description] UTF8String], [_path UTF8String]);
+					}
+					
 					[events addObject:[NSArray arrayWithObjects:XFChangedStatusString, _path, nil]];
 				}
 				

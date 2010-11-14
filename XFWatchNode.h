@@ -28,6 +28,9 @@
 	
 }
 
++ (BOOL)eventLoggingEnabled;
++ (void)setEventLoggingEnabled:(BOOL)enabled;
+
 + (dispatch_queue_t)watchQueue;
 + (dispatch_queue_t)exectuteQueue;
 

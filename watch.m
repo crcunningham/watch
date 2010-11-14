@@ -36,12 +36,23 @@ main (int argc, char * argv[]) {
 			case 'e': 
 				executablePath = [[NSString alloc] initWithUTF8String:optarg];
 				break;
+			case 's':
+				[XFWatchNode setEventLoggingEnabled:NO];
+				break;
+
 			case 'h':
 			default:
 				fprintf(stderr,
 						"watch [-h] [-r depth] [-e path_to_executable] [-v] [path path2 ...]\n");
 				exit(1);
 		}
+	}
+	
+	if(!executablePath && ![XFWatchNode eventLoggingEnabled])
+	{
+		// Nothing for the tool to do, exit
+		printf("watch called with -s and no executable path, nothing to do, exiting...\n");
+		exit(0);
 	}
 	
 	if(executablePath)
