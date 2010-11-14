@@ -26,7 +26,7 @@ static NSString * const XFUnknownStatusString = @"UNKNOWN";
 	
 	if(!watchQueue)
 	{
-		watchQueue = dispatch_queue_create("com.crcunningham.watch", NULL);
+		watchQueue = dispatch_queue_create("com.crcunningham.watch.watchQueue", NULL);
 	}
 	
 	return watchQueue;
@@ -38,7 +38,7 @@ static NSString * const XFUnknownStatusString = @"UNKNOWN";
 	
 	if(!executeQueue)
 	{
-		executeQueue = dispatch_queue_create("com.crcunningham.watch", NULL);
+		executeQueue = dispatch_queue_create("com.crcunningham.watch.executeQueue", NULL);
 	}
 	
 	return executeQueue;
